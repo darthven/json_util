@@ -1,0 +1,20 @@
+{
+    "int_value": 11,
+    "double_value": 23.45,
+    "float_value": 11.23,
+    "char_value": "A",
+    "string_value": "TEST",
+    "array_value": [
+        3, 4.5, "V", "string", [1, 2, 3], {"id": "123"}
+    ],
+    "object_value": {
+        "int_value": 4,
+        "double_value": 3.90,
+        "float_value": 0.11,
+        "char_value": "B",
+        "string_value": "test",
+        "array_value": [
+            10, 11, 12, "13"
+        ]
+    }
+}

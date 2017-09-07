@@ -1,4 +1,4 @@
-#include "json.h"
+#include "json_util.h"
 
 int main() 
 {	
@@ -92,5 +92,11 @@ int main()
 	innerJson = NULL;
 	free(json);
 	json = NULL;
+
+
+	//Get json object from file
+	JSON* json_from_file = read_file("./test.json", 2048);
+	printf("JSON from file: %p", json_from_file);
+
 	return 0;
 }

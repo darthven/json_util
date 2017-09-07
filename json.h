@@ -10,7 +10,7 @@ static const bool true = 1;
 typedef struct TypeDefinition
 {
 	enum {INT = 1, FLOAT = 2, DOUBLE = 3, BOOL = 4, CHAR = 5,
-		 STRING = 6, ARRAY = 7, OBJECT = 8} tag;  
+		 STRING = 6, ARRAY = 7, OBJECT = 8} tag;
 	union
 	{
 		int int_value;
@@ -21,8 +21,7 @@ typedef struct TypeDefinition
 		const char* string_value;	
 		void** array_value;
 		struct JSONDefinition *object_value;
-	} storage;
-	
+	} storage;	   	
 } Type;
 
 typedef struct EntryDefinition
@@ -129,7 +128,7 @@ const int get_int(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 1) 
+		if(entries->key == key && entries->value.tag == INT) 
 		{			
 			return entries->value.storage.int_value;
 		}
@@ -143,7 +142,7 @@ const float get_float(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 2) 
+		if(entries->key == key && entries->value.tag == FLOAT) 
 		{			
 			return entries->value.storage.float_value;
 		}
@@ -158,7 +157,7 @@ const double get_double(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 3) 
+		if(entries->key == key && entries->value.tag == DOUBLE) 
 		{			
 			return entries->value.storage.double_value;
 		}
@@ -172,7 +171,7 @@ const bool get_bool(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 4) 
+		if(entries->key == key && entries->value.tag == BOOL) 
 		{			
 			return entries->value.storage.bool_value;
 		}
@@ -186,7 +185,7 @@ const char get_char(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 5) 
+		if(entries->key == key && entries->value.tag == CHAR) 
 		{			
 			return entries->value.storage.char_value;
 		}
@@ -200,7 +199,7 @@ const char* get_string(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 6) 
+		if(entries->key == key && entries->value.tag == STRING) 
 		{			
 			return entries->value.storage.string_value;
 		}
@@ -214,7 +213,7 @@ void** get_array(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 7) 
+		if(entries->key == key && entries->value.tag == ARRAY) 
 		{			
 			return entries->value.storage.array_value;
 		}
@@ -228,7 +227,7 @@ JSON* get_object(JSON *json, const char* key)
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
 	{		
-		if(entries->key == key && entries->value.tag == 8) 
+		if(entries->key == key && entries->value.tag == OBJECT) 
 		{			
 			return entries->value.storage.object_value;
 		}
