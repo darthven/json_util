@@ -3,6 +3,7 @@
     "double_value": 23.45,
     "float_value": 11.23,
     "char_value": "A",
+    "bool_value": true,
     "string_value": "TEST",
     "array_value": [
         3, 4.5, "V", "string", [1, 2, 3], {"id": "123"}
