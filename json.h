@@ -9,7 +9,8 @@ static const bool true = 1;
 
 typedef struct TypeDefinition
 {
-	enum {INT = 1, FLOAT = 2, DOUBLE = 3, BOOL = 4, CHAR = 5, STRING = 6} tag;  
+	enum {INT = 1, FLOAT = 2, DOUBLE = 3, BOOL = 4, CHAR = 5,
+		 STRING = 6, ARRAY = 7, OBJECT = 8} tag;  
 	union
 	{
 		int int_value;
@@ -18,6 +19,8 @@ typedef struct TypeDefinition
 		bool bool_value;
 		char char_value;
 		const char* string_value;	
+		void** array_value;
+		struct JSONDefinition *object_value;
 	} storage;
 	
 } Type;
@@ -31,28 +34,15 @@ typedef struct EntryDefinition
 typedef struct JSONDefinition
 {
 	Entry entries[256];	
-	const int (*get_free_index) (struct JSONDefinition json);
-	void (*put_int) (struct JSONDefinition json, const char* key, 
-	 const int value);
-	void (*put_float) (struct JSONDefinition json, const char* key, 
-	 const float value);
-	void (*put_double) (struct JSONDefinition json, const char* key,
-	 const double value);
-	void (*put_bool) (struct JSONDefinition json, const char* key, 
-	 const bool value);
-	void (*put_char) (struct JSONDefinition json, const char* key,
-	 const char value);
-	void (*put_string) (struct JSONDefinition json, const char* key, 
-	 const char* value);
-	int (*get_int) (struct JSONDefinition json, const char* key);	
 } JSON;
 
-const int get_free_index(JSON *json) 
+
+const int get_free_index(JSON *json, const char* key) 
 {
 	Entry *entry = json->entries;
 	int index = 0;	
 	while(entry) {		
-		if(entry->value.tag == 0) {
+		if(entry->value.tag == 0 || entry->key == key) {
 			return index;
 		}
 		index++;
@@ -67,7 +57,7 @@ void put_int(JSON *json, const char* key, const int value)
 	entry.key = key;
 	entry.value.storage.int_value = value;
 	entry.value.tag = INT;
-	json->entries[get_free_index(json)] = entry;
+	json->entries[get_free_index(json, key)] = entry;	
 }
 
 void put_float(JSON *json, const char* key, const float value)
@@ -76,7 +66,7 @@ void put_float(JSON *json, const char* key, const float value)
 	entry.key = key;
 	entry.value.storage.float_value = value;
 	entry.value.tag = FLOAT;	
-	json->entries[get_free_index(json)] = entry;
+	json->entries[get_free_index(json, key)] = entry;
 }
 
 void put_double(JSON *json, const char* key, const double value) 
@@ -85,7 +75,16 @@ void put_double(JSON *json, const char* key, const double value)
 	entry.key = key;
 	entry.value.storage.double_value = value;
 	entry.value.tag = DOUBLE;
-	json->entries[get_free_index(json)] = entry;
+	json->entries[get_free_index(json, key)] = entry;
+}
+
+void put_bool(JSON *json, const char* key, const bool value)
+{
+	Entry entry;	
+	entry.key = key;
+	entry.value.storage.bool_value = value;
+	entry.value.tag = BOOL;
+	json->entries[get_free_index(json, key)] = entry;
 }
 
 void put_char(JSON *json, const char* key, const char value)
@@ -94,7 +93,7 @@ void put_char(JSON *json, const char* key, const char value)
 	entry.key = key;
 	entry.value.storage.char_value = value;
 	entry.value.tag = CHAR;
-	json->entries[get_free_index(json)] = entry;
+	json->entries[get_free_index(json, key)] = entry;
 }
 
 void put_string(JSON *json, const char* key, const char* value) 
@@ -103,10 +102,29 @@ void put_string(JSON *json, const char* key, const char* value)
 	entry.key = key;
 	entry.value.storage.string_value = value;
 	entry.value.tag = STRING;	
-	json->entries[get_free_index(json)] = entry;
+	json->entries[get_free_index(json, key)] = entry;
 }
 
-int get_int(JSON *json, const char* key) 
+void put_array(JSON *json, const char* key, void** value) 
+{
+	Entry entry;	
+	entry.key = key;
+	entry.value.storage.array_value = value;
+	entry.value.tag = ARRAY;	
+	json->entries[get_free_index(json, key)] = entry;
+}
+
+void put_object(JSON *json, const char* key, JSON *value) 
+{
+	Entry entry;	
+	entry.key = key;
+	entry.value.storage.object_value = value;
+	entry.value.tag = OBJECT;	
+	json->entries[get_free_index(json, key)] = entry;
+}
+
+
+const int get_int(JSON *json, const char* key) 
 {
 	Entry *entries = json->entries;
 	while(entries->value.tag != 0)
@@ -120,3 +138,101 @@ int get_int(JSON *json, const char* key)
 	return -1;
 }	
 
+const float get_float(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 2) 
+		{			
+			return entries->value.storage.float_value;
+		}
+		entries++;
+	}	
+	return -1.0f;
+}	
+
+
+const double get_double(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 3) 
+		{			
+			return entries->value.storage.double_value;
+		}
+		entries++;
+	}	
+	return -1.0;
+}	
+
+const bool get_bool(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 4) 
+		{			
+			return entries->value.storage.bool_value;
+		}
+		entries++;
+	}	
+	return -1;
+}	
+
+const char get_char(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 5) 
+		{			
+			return entries->value.storage.char_value;
+		}
+		entries++;
+	}	
+	return '\0';
+}	
+
+const char* get_string(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 6) 
+		{			
+			return entries->value.storage.string_value;
+		}
+		entries++;
+	}	
+	return "\0";
+}
+
+void** get_array(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 7) 
+		{			
+			return entries->value.storage.array_value;
+		}
+		entries++;
+	}	
+	return NULL;
+}
+
+JSON* get_object(JSON *json, const char* key) 
+{
+	Entry *entries = json->entries;
+	while(entries->value.tag != 0)
+	{		
+		if(entries->key == key && entries->value.tag == 8) 
+		{			
+			return entries->value.storage.object_value;
+		}
+		entries++;
+	}	
+	return NULL;
+}
